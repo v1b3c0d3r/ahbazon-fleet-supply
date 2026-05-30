@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AHBAZON FLEET // Ship Order</title>
+<style>
+  :root{
+    --bg:#0e0e0e;
+    --panel:#1c1e22;
+    --panel-2:#25282d;
+    --line:#3a3f44;
+    --cyan:#5b93d1;
+    --cyan-dim:#4a78a8;
+    --amber:#e0a458;
+    --green:#62c462;
+    --red:#d9534f;
+    --text:#c8c8c8;
+    --text-dim:#8a8f94;
+    --glow:0 0 10px rgba(91,147,209,.35);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(91,147,209,.05), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    padding:28px clamp(14px,4vw,40px) 80px;
+    background-attachment:fixed;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:linear-gradient(rgba(91,147,209,.02) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(91,147,209,.02) 1px,transparent 1px);
+    background-size:42px 42px;
+    mask-image:radial-gradient(ellipse at 50% 20%,#000,transparent 80%);
+  }
+  .wrap{position:relative;z-index:1;max-width:640px;margin:0 auto}
+
+  header{
+    border:1px solid var(--line);
+    background:linear-gradient(180deg,var(--panel-2),var(--panel));
+    padding:22px 26px;position:relative;overflow:hidden;
+    clip-path:polygon(0 0,calc(100% - 22px) 0,100% 22px,100% 100%,22px 100%,0 calc(100% - 22px));
+  }
+  header::after{content:"";position:absolute;top:0;left:0;height:3px;width:100%;background:linear-gradient(90deg,var(--cyan),transparent 60%)}
+  .sys-tag{color:var(--cyan-dim);font-size:.72rem;letter-spacing:.32em;text-transform:uppercase}
+  h1{font-weight:900;font-size:clamp(1.5rem,5vw,2.3rem);letter-spacing:.04em;color:#e6e6e6;text-shadow:var(--glow);margin:4px 0 2px}
+  h1 span{color:var(--cyan)}
+  .subtitle{color:var(--text-dim);font-size:.95rem;letter-spacing:.1em;text-transform:uppercase}
+
+  .panel{
+    border:1px solid var(--line);
+    background:linear-gradient(180deg,var(--panel-2),var(--panel));
+    margin-top:22px;
+    clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px));
+  }
+  .panel-head{
+    display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--line);
+    font-weight:700;letter-spacing:.12em;font-size:.85rem;text-transform:uppercase;color:#dcdcdc;
+  }
+  .panel-head .dot{width:8px;height:8px;background:var(--cyan);box-shadow:var(--glow);border-radius:1px}
+  .panel-body{padding:20px}
+
+  label{display:block;font-size:.68rem;letter-spacing:.16em;color:var(--text-dim);text-transform:uppercase;margin-bottom:7px}
+  input[type=text]{
+    width:100%;background:#141414;border:1px solid var(--line);color:var(--text);
+    padding:11px 13px;font-family:inherit;font-size:1.05rem;letter-spacing:.04em;outline:none;transition:.2s;
+  }
+  input[type=text]:focus{border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan-dim),var(--glow)}
+
+  .ship-list{margin-top:18px;display:flex;flex-direction:column;gap:6px;max-height:none}
+  .ship-row{
+    display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:10px;
+    background:#16181c;border:1px solid var(--line);padding:9px 12px;transition:.18s;
+  }
+  .ship-row:hover{border-color:var(--cyan-dim)}
+  .ship-row.active{border-color:var(--cyan);background:#202327}
+  .ship-name{font-weight:600;font-size:1.02rem;line-height:1.1}
+  .ship-name small{display:block;font-size:.62rem;color:var(--text-dim);letter-spacing:.1em;margin-top:2px}
+  .ship-price{color:var(--amber);font-size:.85rem;white-space:nowrap}
+  .qty{display:flex;align-items:center;gap:4px}
+  .qty button{width:30px;height:30px;border:1px solid var(--line);background:#22262b;color:var(--cyan);font-weight:700;cursor:pointer;transition:.15s;line-height:1;font-size:1rem}
+  .qty button:hover{border-color:var(--cyan);background:#2c333a}
+  .qty input{width:44px;text-align:center;background:#141414;border:1px solid var(--line);color:var(--text);padding:6px 0;font-size:.9rem}
+
+  .order-total{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line);display:flex;justify-content:space-between;align-items:baseline}
+  .order-total .t-label{letter-spacing:.16em;color:var(--text-dim);font-size:.72rem;text-transform:uppercase}
+  .order-total .t-val{font-weight:700;font-size:1.5rem;color:var(--green)}
+
+  .btn{
+    width:100%;margin-top:18px;padding:14px;border:1px solid var(--cyan);
+    background:linear-gradient(180deg,#2a3947,#1f2630);color:var(--cyan);
+    font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:.85rem;cursor:pointer;transition:.2s;
+  }
+  .btn:hover{background:var(--cyan);color:#0e0e0e;box-shadow:var(--glow)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+
+  .hint{margin-top:12px;font-size:.78rem;color:var(--text-dim);letter-spacing:.04em;line-height:1.5}
+
+  /* Confirmation */
+  .confirm{text-align:center;padding:30px 24px}
+  .confirm .check{font-size:2.6rem;color:var(--green);margin-bottom:6px}
+  .confirm h2{font-weight:800;letter-spacing:.04em;color:#e6e6e6;margin-bottom:8px;font-size:1.4rem}
+  .confirm .oid{color:var(--cyan);font-size:.85rem;letter-spacing:.14em;margin-bottom:18px}
+  .receipt{text-align:left;border:1px solid var(--line);background:#16181c;margin:0 auto 18px;max-width:420px}
+  .receipt .r-line{display:flex;justify-content:space-between;padding:8px 14px;border-bottom:1px solid rgba(58,63,68,.6);font-size:.95rem}
+  .receipt .r-line:last-child{border-bottom:none}
+  .receipt .r-total{display:flex;justify-content:space-between;padding:10px 14px;border-top:1px solid var(--line);font-weight:700}
+  .receipt .r-total .v{color:var(--green)}
+  .linkbtn{background:none;border:1px solid var(--line);color:var(--text-dim);padding:10px 18px;cursor:pointer;letter-spacing:.1em;font-size:.78rem;text-transform:uppercase;transition:.18s;font-family:inherit}
+  .linkbtn:hover{border-color:var(--cyan);color:var(--cyan)}
+
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);
+    background:var(--panel-2);border:1px solid var(--cyan);color:var(--cyan);padding:12px 22px;
+    letter-spacing:.12em;font-size:.8rem;z-index:50;transition:.35s;box-shadow:var(--glow);
+  }
+  .toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="sys-tag">// SYSTEM: AHBAZON &nbsp;·&nbsp; NPSI FLEET SUPPLY</div>
+    <h1>AHBAZON <span>FLEET</span> ORDER</h1>
+    <div class="subtitle">Doctrine Ship Request Form</div>
+  </header>
+
+  <!-- INTAKE -->
+  <div class="panel" id="formPanel">
+    <div class="panel-head"><span class="dot"></span>Build Your Order</div>
+    <div class="panel-body">
+      <label for="pilotName">Your Character Name</label>
+      <input type="text" id="pilotName" placeholder="In-game character name" autocomplete="off">
+
+      <label style="margin-top:16px">Select Doctrine Hulls</label>
+      <div class="ship-list" id="shipList"></div>
+
+      <div class="order-total">
+        <span class="t-label">Order Total</span>
+        <span class="t-val" id="orderTotal">0m</span>
+      </div>
+      <button class="btn" id="submitBtn" disabled>Submit Order</button>
+      <div class="hint">Your order is sent to the Ahbazon logistics team. Once your ships are staged in system, they'll create an in-game contract to your character name. Pricing is per-hull and shown in ISK (m = million, b = billion).</div>
+    </div>
+  </div>
+
+  <!-- CONFIRMATION (hidden until submit) -->
+  <div class="panel" id="confirmPanel" style="display:none">
+    <div class="panel-head"><span class="dot"></span>Order Submitted</div>
+    <div class="confirm">
+      <div class="check">✓</div>
+      <h2>Order Received</h2>
+      <div class="oid" id="confirmId"></div>
+      <div class="receipt" id="confirmReceipt"></div>
+      <p class="hint" style="max-width:420px;margin:0 auto 18px">Your contract will be created in-game to the character name you provided once the hulls are staged at Ahbazon. Fly safe.</p>
+      <button class="linkbtn" id="newOrderBtn">Place Another Order</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase + storage shim (must load before the app script) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/storage.js"></script>
+<script>
+const SHIPS = [
+  {code:"GC-BN", name:"BNI",         price:215},
+  {code:"QRF-TM",name:"Tempest",     price:305},
+  {code:"QRF-RJ",name:"Jaguar",      price:27},
+  {code:"QRF-EQ",name:"Exequor",     price:30},
+  {code:"QRF-SL",name:"Slasher",     price:10},
+  {code:"QRF-GF",name:"Griffin",     price:3},
+  {code:"QRF-AG",name:"Armageddon",  price:265},
+  {code:"QRF-HB",name:"Harbinger",   price:112},
+  {code:"QRF-HU",name:"Hurricane",   price:90},
+  {code:"QRF-AB",name:"Arbitrator",  price:40},
+  {code:"CSD-NA",name:"Tornado",     price:195},
+  {code:"CSD-CA",name:"Caracal",     price:33},
+  {code:"CSD-VX",name:"Vexor",       price:43},
+  {code:"CSD-PX",name:"Praxis",      price:650},
+];
+
+const ORDERS_KEY='orders';   // SHARED key — same list the tracker reads
+let cart = {};
+
+const $ = id => document.getElementById(id);
+const fmt = n => {
+  if(n >= 1000){ let b=(n/1000).toFixed(2).replace(/\.?0+$/,''); return b+"b"; }
+  return n.toLocaleString('en-US') + "m";
+};
+
+/* ---------- Ship list ---------- */
+function renderShipList(){
+  const wrap=$('shipList'); wrap.innerHTML='';
+  SHIPS.forEach(s=>{
+    const q=cart[s.code]||0;
+    const row=document.createElement('div');
+    row.className='ship-row'+(q>0?' active':'');
+    row.innerHTML=`
+      <div class="ship-name">${s.name}<small>${s.code}</small></div>
+      <div class="ship-price">${s.price}m</div>
+      <div class="qty">
+        <button data-c="${s.code}" data-d="-1">−</button>
+        <input type="text" inputmode="numeric" value="${q}" data-in="${s.code}">
+        <button data-c="${s.code}" data-d="1">+</button>
+      </div>`;
+    wrap.appendChild(row);
+  });
+  wrap.querySelectorAll('button[data-c]').forEach(b=>{
+    b.onclick=()=>{
+      const c=b.dataset.c,d=parseInt(b.dataset.d);
+      cart[c]=Math.max(0,(cart[c]||0)+d);
+      if(cart[c]===0) delete cart[c];
+      renderShipList(); updateTotal();
+    };
+  });
+  wrap.querySelectorAll('input[data-in]').forEach(inp=>{
+    inp.onchange=()=>{
+      const c=inp.dataset.in;
+      let v=parseInt(inp.value.replace(/\D/g,''))||0;
+      if(v<=0) delete cart[c]; else cart[c]=v;
+      renderShipList(); updateTotal();
+    };
+  });
+}
+function cartTotal(){
+  return Object.entries(cart).reduce((sum,[c,q])=>{
+    const s=SHIPS.find(x=>x.code===c); return sum+s.price*q;
+  },0);
+}
+function updateTotal(){
+  $('orderTotal').textContent=fmt(cartTotal());
+  const hasItems=Object.keys(cart).length>0;
+  const hasName=$('pilotName').value.trim().length>0;
+  $('submitBtn').disabled=!(hasItems&&hasName);
+}
+
+/* ---------- Submit (append to shared storage) ---------- */
+let submitting=false;
+async function submitOrder(){
+  if(submitting) return;
+  const pilot=$('pilotName').value.trim();
+  if(!pilot||Object.keys(cart).length===0) return;
+  submitting=true; $('submitBtn').disabled=true; $('submitBtn').textContent='Submitting…';
+
+  const items=Object.entries(cart).map(([c,q])=>{
+    const s=SHIPS.find(x=>x.code===c);
+    return {code:c,name:s.name,price:s.price,qty:q};
+  });
+  const order={
+    id:'AHB-'+Date.now().toString().slice(-6),
+    pilot, items,
+    total:cartTotal(),
+    stage:0,
+    completed:false,
+    created:Date.now()
+  };
+
+  // Safe read-merge-write so simultaneous submissions don't overwrite each other.
+  let ok=false;
+  for(let attempt=0; attempt<3 && !ok; attempt++){
+    try{
+      let current=[];
+      try{
+        const r=await window.storage.get(ORDERS_KEY,true);
+        if(r&&r.value) current=JSON.parse(r.value);
+      }catch(e){ current=[]; }
+      if(!current.some(o=>o.id===order.id)) current.push(order);
+      const res=await window.storage.set(ORDERS_KEY,JSON.stringify(current),true);
+      ok = res!==null && res!==undefined;
+    }catch(e){ ok=false; }
+    if(!ok) await new Promise(r=>setTimeout(r,300));
+  }
+
+  submitting=false; $('submitBtn').textContent='Submit Order';
+  if(!ok){
+    updateTotal();
+    showToast('SUBMIT FAILED — PLEASE TRY AGAIN');
+    return;
+  }
+  showConfirm(order);
+}
+
+function showConfirm(order){
+  $('confirmId').textContent='ORDER '+order.id;
+  const lines=order.items.map(i=>`
+    <div class="r-line"><span>${i.qty}× ${i.name} <span style="color:var(--text-dim);font-size:.8rem">[${i.code}]</span></span><span style="color:var(--text-dim)">${fmt(i.price*i.qty)}</span></div>`).join('');
+  $('confirmReceipt').innerHTML=lines+
+    `<div class="r-total"><span>${escapeHtml(order.pilot)}</span><span class="v">${fmt(order.total)}</span></div>`;
+  $('formPanel').style.display='none';
+  $('confirmPanel').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function resetForm(){
+  cart={}; $('pilotName').value='';
+  renderShipList(); updateTotal();
+  $('confirmPanel').style.display='none';
+  $('formPanel').style.display='block';
+}
+
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+let toastTimer;
+function showToast(msg){
+  const t=$('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+/* ---------- Init ---------- */
+$('pilotName').addEventListener('input',updateTotal);
+$('submitBtn').addEventListener('click',submitOrder);
+$('newOrderBtn').addEventListener('click',resetForm);
+renderShipList();
+updateTotal();
+</script>
+</body>
+</html>
